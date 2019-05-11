@@ -185,10 +185,10 @@ function checkAnswers() {
 	for(i=0; i < picsIx4.length; i++){
 		if(userAnswerElems[i].innerHTML== allPics[picsIx4[i]]){
 			points++;
-			correctAnswerElems[i].innerHTML=allPics[picsIx4[i]] + "<br>" + allDescription[picsIx4[i]];
 		}
-	msgElem.innerHTML="Spelet är slut! Du fick " + points + " poäng!";
+		correctAnswerElems[i].innerHTML=allPics[picsIx4[i]] + "<br>" + allDescription[picsIx4[i]];
 	}
+	msgElem.innerHTML="Spelet är slut! Du fick " + points + " poäng!";
 	startGameBtn.disabled=false;
 	checkAnswersBtn.disabled=true;
 } // End checkAnswers
