@@ -32,6 +32,8 @@ function startGame() {
     startGameBtn.disabled=true;
     checkTurns=0;   //Nytt spel, noll omgångar
     rightPicks=0;   //Nytt spel, noll rätt
+    var i;          //Loopvariabel
+    
     //Alla bilder får baksidbilden
     for(i=0;i<picsElems.length;i++) {
         picsElems[i].src="pics/backside.png"
@@ -82,39 +84,53 @@ function updateTiles() {
 }
 
 function turnPic() {
-    noTurns++;
-    if(noTurns>=2) {
-        
-        
-        for(i=0;i<picsElems.length;i++) {
-            picsElems[i].disabled=true;
-        }
-        nextButton.disabled=false;    
+    
+    //Koll om man redan valt två st kort, isf stannar funktionen.
+    if(noTurns>=2) {  
         return;
     }    
+    console.log("turnPic", noTurns);
     
     picIndex[noTurns]=this.getAttribute("index");
     picsElems[picIndex[noTurns]].src="pics/"+picTiles[picIndex[noTurns]]+".png"
     picsElems[picIndex[noTurns]].className="brickFront";
     selectedPicture[noTurns]=picsElems[picIndex[noTurns]].src
     
+    console.log("picIndex", picIndex[noTurns]);
+
+
+    if(picIndex[1]!=picIndex[0]) {
+        console.log("same", picIndex[0], picIndex[1]);
+        if(noTurns>=1) {
+            for(i=0;i<picsElems.length;i++) {
+                picsElems[i].disabled=true;
+            }
+            nextButton.disabled=false;  
+        }    
+        noTurns++;
+    }    
+    
+
 } //End turnPic
 
 function checkPick() {
     noTurns=0;
-    if (selectedPicture[1]==selectedPicture[2]) {
+    console.log("Checkpick");
+    if (selectedPicture[0]==selectedPicture[1]) {
+        picsElems[picIndex[0]].src="pics/empty.png";
         picsElems[picIndex[1]].src="pics/empty.png";
-        picsElems[picIndex[2]].src="pics/empty.png";
+        picsElems[picIndex[0]].className="brickEmpty";
         picsElems[picIndex[1]].className="brickEmpty";
-        picsElems[picIndex[2]].className="brickEmpty";
+        removeListener(picsElems[picIndex[0]], "click", turnPic);
         removeListener(picsElems[picIndex[1]], "click", turnPic);
-        removeListener(picsElems[picIndex[2]], "click", turnPic);
         rightPicks=rightPicks+2
     } else {
+        picsElems[picIndex[0]].src="pics/backside.png"
         picsElems[picIndex[1]].src="pics/backside.png"
-        picsElems[picIndex[2]].src="pics/backside.png"
+        picsElems[picIndex[0]].className="brickBack";
         picsElems[picIndex[1]].className="brickBack";
-        picsElems[picIndex[2]].className="brickBack";
+        picIndex[0]=null;
+        picIndex[1]=null;
     }
     checkTurns++;
     for(i=0;i<picsElems.length;i++) {
@@ -129,3 +145,5 @@ function checkWin() {
 
 } //End checkWin
 
+//Felsökte stor bugg, om man klickade på samma första gången.
+//Använde consol log för att felsöka hantera.
