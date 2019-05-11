@@ -147,3 +147,5 @@ function checkWin() {
 
 //Felsökte stor bugg, om man klickade på samma första gången.
 //Använde consol log för att felsöka hantera.
+//Sätt att hantera turnpic, länka bilder till tiles
+//bugg avs att man kunde klicka på samma bild två ggr och få upp nästa
