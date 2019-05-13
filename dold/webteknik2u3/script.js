@@ -16,12 +16,11 @@ var userMeanPoints;     //Referens till span element avs medelpoängen.
 var totalGames;         //Variabel som håller koll på antalet spel
 var totalPoints;        //Variabel som håller koll på totala poängen
 var meanScore;          //Variabel som håller koll på medelpoängen
+var displayScore;       //Referens till displayknapp
+var displayMore;        //Referens till classID
 
 // Initiera globala variabler och koppla funktion till knapp
 function init() {
-    totalPoints=0;
-    totalGames=0;
-    meanScore=0;
     picIndex = [];          //Skapar en array
     selectedPicture = [];   //Skapar en array
     picTiles=[];            //Skapar en array
@@ -33,14 +32,16 @@ function init() {
     userTotPoints=document.getElementById("userTotPoints");
     userCountGames=document.getElementById("userCountGames");
     userMeanPoints=document.getElementById("userMeanPoints");
-    //getCookie();            //Hämtar cookie värden
+    displayScore=document.getElementById("userInfo").getElementsByTagName("a")[0];
+    displayMore=document.getElementById("userMoreInfo");
     addListener(startGameBtn,"click", startGame);
     addListener(nextButton,"click", checkPick);
+    addListener(displayScore,"click", showScore);
     nextButton.disabled=true;
-
 } //End init
 addListener(window,"load",init); // Se till att init aktiveras då sidan är inladdad
-addListener(window, "unload", saveCookie);
+addListener(window, "unload", saveCookie); //sparar cookies vid unload av fönster
+addListener(window, "load", getCookie); //hämtar cookies vid load
 
 //Funktion för att initiera spel
 function startGame() {
@@ -50,14 +51,12 @@ function startGame() {
     checkTurns=0;   //Nytt spel, noll omgångar
     rightPicks=0;   //Nytt spel, noll rätt
     var i;          //Loopvariabel
-    
     //Alla bilder får baksidbilden
     for(i=0;i<picsElems.length;i++) {
         picsElems[i].src="pics/backside.png"
         picsElems[i].className="brickBack";
     }
     updateTiles(); //Anropa funktionen för att slumpa bilderna till varje bricka
-    
     //Event för klick samt ett unikt attribut för att hitta bilder
     for(i=0;i<picsElems.length;i++) {
         addListener(picsElems[i], "click", turnPic);
@@ -72,7 +71,6 @@ function updateTiles() {
     var r;                  //Variabel för att ange ett slumpässigt tal
     var allNo = [];         //Array som skall hålla alla möjliga tal (för bildernas referens)
     var a, b;               //Variablar för att hålla temporära värden för shuffle av array   
-
     //Populera arrayn med maximalt möjliga referenser till bilderna
     for (i=0;i<20;i++) {
         allNo[i]=i;
@@ -85,7 +83,6 @@ function updateTiles() {
         allNo.splice(r,1);
         picTiles[i]=picNo[i]
     }
-    
     //Shuffla picNo arrayn
     for (i = picNo.length - 1; i > 0; i--) {
         a = Math.floor(Math.random() * (i + 1));
@@ -93,7 +90,6 @@ function updateTiles() {
         picNo[i] = picNo[a];
         picNo[a] = b;
     }
-    
     //Populera resterande del av array med slumpade siffror så att allt inte hamnar på motsvarande platser
     for (i=picsElems.length/2;i<picsElems.length;i++) {
         picTiles[i]=picNo[i-picsElems.length/2];
@@ -101,23 +97,18 @@ function updateTiles() {
 }
 
 function turnPic() {
-    
     //Koll om man redan valt två st kort, isf stannar funktionen.
     if(noTurns>=2) {  
         return;
     }    
-    console.log("turnPic", noTurns); //Använde consol log för att felsöka hantera.
-    
+    // console.log("turnPic", noTurns); //Använde consol log för att felsöka hantera.
     picIndex[noTurns]=this.getAttribute("index"); //Sätt att hantera turnpic, länka bilder till tiles
     picsElems[picIndex[noTurns]].src="pics/"+picTiles[picIndex[noTurns]]+".png"
     picsElems[picIndex[noTurns]].className="brickFront";
     selectedPicture[noTurns]=picsElems[picIndex[noTurns]].src
-    
-    console.log("picIndex", picIndex[noTurns]); //Använde consol log för att felsöka hantera.
-
-
+    // console.log("picIndex", picIndex[noTurns]); //Använde consol log för att felsöka hantera.
     if(picIndex[1]!=picIndex[0]) {
-        console.log("same", picIndex[0], picIndex[1]);
+        // console.log("same", picIndex[0], picIndex[1]); //Använde consol log för att felsöka i hantera
         if(noTurns>=1) {
             for(i=0;i<picsElems.length;i++) {
                 picsElems[i].disabled=true;
@@ -126,13 +117,11 @@ function turnPic() {
         }    
         noTurns++;
     }    
-    
-
 } //End turnPic
 
 function checkPick() {
     noTurns=0;
-    console.log("Checkpick"); //Använde consol log för att felsöka hantera.
+    // console.log("Checkpick"); //Använde consol log för att felsöka hantera.
     if (selectedPicture[0]==selectedPicture[1]) { //bugg avs att man kunde klicka på samma bild två ggr och få upp nästa
         picsElems[picIndex[0]].src="pics/empty.png";
         picsElems[picIndex[1]].src="pics/empty.png";
@@ -163,23 +152,17 @@ function checkWin() {
         picIndex[0]=null; //Felsökte stor bugg, om man klickade på samma första gången gick det att vända tre bilder. Löstes genom denna kodrad.
         picIndex[1]=null; //Felsökte stor bugg, om man klickade på samma första gången gick det att vända tre bilder. Löstes genom denna kodrad.
         var points=20-Math.round((checkTurns-rightPicks/2)*1.2); //lokalvariabel för att räkna rundans poäng
-        
-        alert(points);
-
-
+        alert("Grattis! Du hittade alla rutor. Dina poäng blev "+points);
         //Om man får ett belopp under 0 ska poängen sättas till noll
         if (points<0) {
             points=0;
         }
-        
         totalPoints+=points; //adderar rundans poäng till totalen
-        
         //Uppdaterar användarens vy med poänginfo
-        meanScore=totalPoints/totalGames;
+        meanScore=Math.round(Number(totalPoints/totalGames));
         userCountGames.innerHTML=totalGames;
         userMeanPoints.innerHTML=meanScore;
         userTotPoints.innerHTML=totalPoints;
-
         nextButton.disabled=true;
         startGameBtn.disabled=false;
     }
@@ -187,34 +170,39 @@ function checkWin() {
 
 //Funktion för att spara diverse värden i cookies
 function saveCookie() {
-    setCookie("totalScore", totalPoints);
-    setCookie("totalGames", totalGames);
-    setCookie("meanScore", meanScore);
+    setCookie("totalScore", totalPoints); //spara ned cookievärde
+    setCookie("totalGames", totalGames);   //spara ned cookievärde
+    setCookie("meanScore", meanScore);  //spara ned cookievärde
 }
 
 //Funktion för att hämta värden från cookies och sparas i globala variabler
 function getCookie() {
-    totalPoints=getCookie("totalScore");
-    totalGames=getCookie("totalGames");
-    meanScore=getCookie("meanScore");
-    if (totalPoints!=null) {
-        userTotPoints=totalPoints;
+    var cookieTotal, cookieGames, cookieMean; //Lokala variabler för att hämta nummer värden från cookies
+    cookieTotal = Number(getCookie("totalScore"));
+    cookieMean = Number(getCookie("meanScore"));
+    cookieGames = Number(getCookie("totalGames"));
+    // console.log("Nu körs getCookie", cookieTotal, cookieMean, cookieGames); //för att felsöka varför cookies inte kördes. Löstes från att köra funktionen getCookie(); i init till add listener.
+    //If satser för att ange antingen cookies värde om detta finns, alt. 0 då det är ett helt nytt spel
+    if (cookieTotal!=null) {
+        totalPoints=cookieTotal
     } else {
         totalPoints=0;
     }
-    if (userCountGames!=null) {
-        userCountGames=totalGames;
+    if (cookieMean!=null) {
+        meanScore=cookieMean;
     } else {
-        userCountGames=0;
+        meanScore=0;
     }
-    if (userMeanPoints!=null) {
-        userMeanPoints=meanScore;
+    if (cookieGames!=null) {
+        totalGames=cookieGames;
     } else {
-        userMeanPoints=0;
+        totalGames=0;
     }
+    //Skriver ut värdena till GUI.
+    userTotPoints.innerHTML=totalPoints;
+    userCountGames.innerHTML=totalGames;
+    userMeanPoints.innerHTML=meanScore;
 }
-
-
-
-
-
+function showScore () {
+    displayMore.style.display="block"; 
+}
