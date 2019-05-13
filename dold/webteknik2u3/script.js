@@ -18,9 +18,13 @@ var totalPoints;        //Variabel som håller koll på totala poängen
 var meanScore;          //Variabel som håller koll på medelpoängen
 var displayScore;       //Referens till displayknapp
 var displayMore;        //Referens till classID
+var bricks;             //Referens till bricks
+var options;            //Referens til nrOfBricksMenu
+var optionlastround;    //Variabel för att kontrollera vad som valts fg runda
 
 // Initiera globala variabler och koppla funktion till knapp
 function init() {
+    optionlastround = 0;    //Sätts till noll initialt
     picIndex = [];          //Skapar en array
     selectedPicture = [];   //Skapar en array
     picTiles=[];            //Skapar en array
@@ -34,6 +38,8 @@ function init() {
     userMeanPoints=document.getElementById("userMeanPoints");
     displayScore=document.getElementById("userInfo").getElementsByTagName("a")[0];
     displayMore=document.getElementById("userMoreInfo");
+    options=document.getElementById("nrOfBricksMenu");
+    bricks=document.getElementById("bricks");
     addListener(startGameBtn,"click", startGame);
     addListener(nextButton,"click", checkPick);
     addListener(displayScore,"click", showScore);
@@ -45,7 +51,10 @@ addListener(window, "load", getCookie); //hämtar cookies vid load
 
 //Funktion för att initiera spel
 function startGame() {
-    //getCookie();            //Hämtar cookie värden
+    for(i=0;i<picsElems.length;i++) {
+        picsElems[i].setAttribute("id", "initial");
+    }
+    changeBricks();
     totalGames++;   //Antal spel ökar med 1
     startGameBtn.disabled=true;
     checkTurns=0;   //Nytt spel, noll omgångar
@@ -62,6 +71,7 @@ function startGame() {
         addListener(picsElems[i], "click", turnPic);
         picsElems[i].setAttribute("index", i) //Sätt att hantera turnpic, länka bilder till tiles
     }
+    options.disabled=true;
 } //End startGame
 
 //Funktion för att slumpa fram nya brickor
@@ -152,11 +162,14 @@ function checkWin() {
         picIndex[0]=null; //Felsökte stor bugg, om man klickade på samma första gången gick det att vända tre bilder. Löstes genom denna kodrad.
         picIndex[1]=null; //Felsökte stor bugg, om man klickade på samma första gången gick det att vända tre bilder. Löstes genom denna kodrad.
         var points=20-Math.round((checkTurns-rightPicks/2)*1.2); //lokalvariabel för att räkna rundans poäng
-        alert("Grattis! Du hittade alla rutor. Dina poäng blev "+points);
+        
         //Om man får ett belopp under 0 ska poängen sättas till noll
         if (points<0) {
             points=0;
         }
+
+        alert("Grattis! Du hittade alla rutor. Dina poäng blev "+points);
+
         totalPoints+=points; //adderar rundans poäng till totalen
         //Uppdaterar användarens vy med poänginfo
         meanScore=Math.round(Number(totalPoints/totalGames));
@@ -165,6 +178,7 @@ function checkWin() {
         userTotPoints.innerHTML=totalPoints;
         nextButton.disabled=true;
         startGameBtn.disabled=false;
+        options.disabled=false;
     }
 } //End checkWin
 
@@ -203,6 +217,47 @@ function getCookie() {
     userCountGames.innerHTML=totalGames;
     userMeanPoints.innerHTML=meanScore;
 }
+
+//Funktion för att visa mer information
 function showScore () {
     displayMore.style.display="block"; 
+}
+
+function changeBricks() {
+    var userOptions= options.options[options.selectedIndex].text; //skriver ut vald option i textsträng
+    
+    var x, y; //variabler för att hålla nummerna från options
+    var i; //Loopvariabel
+    var total; //räknar ut totala bricks
+    x=Number(userOptions.charAt(0));
+    y=Number(userOptions.charAt(2));
+    total=x*y;
+    
+    if(optionlastround==0) {
+        for(i=0;i<16;i++) {
+            var remImg = document.getElementById("initial");
+            remImg.parentNode.removeChild(remImg);
+        }
+    } else {
+        for(i=0;i<optionlastround;i++) {
+            var remImg = document.getElementById("initial");
+            remImg.parentNode.removeChild(remImg);
+        }
+    }
+
+    if(total==30) {
+        bricks.style.width="400px";
+    } else if (total==36) {
+        bricks.style.width="450px";
+    } else {
+        bricks.style.width="280px";
+    }
+    for (i=0; i<total; i++) {
+        var img = document.createElement("img");
+        img.setAttribute("src", "pics/backside.png");
+        img.setAttribute("alt", "spelbricka");
+        img.setAttribute("class", "brickBack");
+        bricks.appendChild(img);
+    }
+optionlastround=total;
 }
