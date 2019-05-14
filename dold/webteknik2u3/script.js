@@ -20,11 +20,9 @@ var displayScore;       //Referens till displayknapp
 var displayMore;        //Referens till classID
 var bricks;             //Referens till bricks
 var options;            //Referens til nrOfBricksMenu
-var optionlastround;    //Variabel för att kontrollera vad som valts fg runda
 
 // Initiera globala variabler och koppla funktion till knapp
 function init() {
-    optionlastround = 0;    //Sätts till noll initialt
     picIndex = [];          //Skapar en array
     selectedPicture = [];   //Skapar en array
     picTiles=[];            //Skapar en array
@@ -52,7 +50,7 @@ addListener(window, "load", getCookie); //hämtar cookies vid load
 //Funktion för att initiera spel
 function startGame() {
     for(i=0;i<picsElems.length;i++) {
-        picsElems[i].setAttribute("id", "initial");
+        picsElems[i].setAttribute("id", "initial"+i); //sätter ett unikt ID på ursprungliga img elementen i index.
     }
     changeBricks();
     totalGames++;   //Antal spel ökar med 1
@@ -106,6 +104,7 @@ function updateTiles() {
     }
 }
 
+//Funktion för att kontrollera att två unika tiles vänts och tillåter sedan användaren att klicka nästa
 function turnPic() {
     //Koll om man redan valt två st kort, isf stannar funktionen.
     if(noTurns>=2) {  
@@ -129,6 +128,7 @@ function turnPic() {
     }    
 } //End turnPic
 
+//Funktion för att kontrollera att valen man gjort är rätt eller fel
 function checkPick() {
     noTurns=0;
     // console.log("Checkpick"); //Använde consol log för att felsöka hantera.
@@ -157,6 +157,7 @@ function checkPick() {
     checkWin();
 } //End checkPick
 
+//Funktion för att kontrollera om man vunnit eller ej samt uträkning av totala poäng, medelvärde och antal spel. Skickar detta till GUIt
 function checkWin() {
     if(rightPicks==picsElems.length) {
         picIndex[0]=null; //Felsökte stor bugg, om man klickade på samma första gången gick det att vända tre bilder. Löstes genom denna kodrad.
@@ -189,7 +190,7 @@ function saveCookie() {
     setCookie("meanScore", meanScore);  //spara ned cookievärde
 }
 
-//Funktion för att hämta värden från cookies och sparas i globala variabler
+//Funktion för att hämta värden från cookies och sparas i FUIt
 function getCookie() {
     var cookieTotal, cookieGames, cookieMean; //Lokala variabler för att hämta nummer värden från cookies
     cookieTotal = Number(getCookie("totalScore"));
@@ -218,33 +219,32 @@ function getCookie() {
     userMeanPoints.innerHTML=meanScore;
 }
 
-//Funktion för att visa mer information
+//Funktion för att visa/dölja mer information för användaren
 function showScore () {
-    displayMore.style.display="block"; 
+    if (displayMore.style.display=="block") {
+        displayMore.style.display="none"
+    } else {
+        displayMore.style.display="block"; 
+    }
 }
 
+//Funktion för att hantera valet av antal brickor som användaren görs
 function changeBricks() {
     var userOptions= options.options[options.selectedIndex].text; //skriver ut vald option i textsträng
-    
+    var length = picsElems.length; //lokalt sparad variabel för att erhålla antalet img element innan det börjas göras modifieringar till denna
     var x, y; //variabler för att hålla nummerna från options
     var i; //Loopvariabel
     var total; //räknar ut totala bricks
     x=Number(userOptions.charAt(0));
     y=Number(userOptions.charAt(2));
     total=x*y;
-    
-    if(optionlastround==0) {
-        for(i=0;i<16;i++) {
-            var remImg = document.getElementById("initial");
-            remImg.parentNode.removeChild(remImg);
-        }
-    } else {
-        for(i=0;i<optionlastround;i++) {
-            var remImg = document.getElementById("initial");
-            remImg.parentNode.removeChild(remImg);
-        }
-    }
 
+        for(i=0;i<length;i++) {
+            var remImg = document.getElementById("initial"+i); //lokalvaribel för att koppla ett img element i taget
+            remImg.parentNode.removeChild(remImg); //tar bort initiala img elementen.
+        }
+
+    //Anpassar width beroende på valda bricks
     if(total==30) {
         bricks.style.width="400px";
     } else if (total==36) {
@@ -252,6 +252,8 @@ function changeBricks() {
     } else {
         bricks.style.width="280px";
     }
+    
+    //Skapar nya img element baserat på valet användaren gjort
     for (i=0; i<total; i++) {
         var img = document.createElement("img");
         img.setAttribute("src", "pics/backside.png");
@@ -259,5 +261,4 @@ function changeBricks() {
         img.setAttribute("class", "brickBack");
         bricks.appendChild(img);
     }
-optionlastround=total;
 }
