@@ -4,7 +4,7 @@ var startGameBtn;		//Referens till start-knappen (button)
 var nextButton;         //Referens till nästa-knappen (button)
 var picsElems;          //Referens till alla bildelement 
 var picTiles;           //Array for att länka slumptal till bilder
-var noTurns;            //Flagga för att hålla koll på antalet vända bilder
+var numberofTurns;            //Flagga för att hålla koll på antalet vända bilder
 var selectedPicture;    //Array för att hålla koll på valda bilder
 var picIndex;           //Flagga för att hålla koll på valt index  
 var checkTurns;         //Håller koll på antalet omgångar (för poäng)
@@ -20,13 +20,14 @@ var displayScore;       //Referens till displayknapp
 var displayMore;        //Referens till classID
 var bricks;             //Referens till bricks
 var options;            //Referens til nrOfBricksMenu
+var message;            //Referens till message i HTML koden
 
 // Initiera globala variabler och koppla funktion till knapp
 function init() {
     picIndex = [];          //Skapar en array
     selectedPicture = [];   //Skapar en array
     picTiles=[];            //Skapar en array
-    noTurns=0;              //Sätter noTurns till 0
+    numberofTurns=0;              //Sätter numberofTurns till 0
     startGameBtn=document.getElementById("startGameBtn");
     nextButton=document.getElementById("nextBtn");
     picsElems=document.getElementById("bricks").getElementsByTagName("img");
@@ -38,6 +39,7 @@ function init() {
     displayMore=document.getElementById("userMoreInfo");
     options=document.getElementById("nrOfBricksMenu");
     bricks=document.getElementById("bricks");
+    message=document.getElementById("message");
     addListener(startGameBtn,"click", startGame);
     addListener(nextButton,"click", checkPick);
     addListener(displayScore,"click", showScore);
@@ -49,6 +51,7 @@ addListener(window, "load", getCookie); //hämtar cookies vid load
 
 //Funktion för att initiera spel
 function startGame() {
+    message.innerHTML=""; //Tar bort meddelande vid nytt spel
     for(i=0;i<picsElems.length;i++) {
         picsElems[i].setAttribute("id", "initial"+i); //sätter ett unikt ID på ursprungliga img elementen i index.
     }
@@ -107,30 +110,30 @@ function updateTiles() {
 //Funktion för att kontrollera att två unika tiles vänts och tillåter sedan användaren att klicka nästa
 function turnPic() {
     //Koll om man redan valt två st kort, isf stannar funktionen.
-    if(noTurns>=2) {  
+    if(numberofTurns>=2) {  
         return;
     }    
-    // console.log("turnPic", noTurns); //Använde consol log för att felsöka hantera.
-    picIndex[noTurns]=this.getAttribute("index"); //Sätt att hantera turnpic, länka bilder till tiles
-    picsElems[picIndex[noTurns]].src="pics/"+picTiles[picIndex[noTurns]]+".png"
-    picsElems[picIndex[noTurns]].className="brickFront";
-    selectedPicture[noTurns]=picsElems[picIndex[noTurns]].src
-    // console.log("picIndex", picIndex[noTurns]); //Använde consol log för att felsöka hantera.
+    // console.log("turnPic", numberofTurns); //Använde consol log för att felsöka hantera.
+    picIndex[numberofTurns]=this.getAttribute("index"); //Sätt att hantera turnpic, länka bilder till tiles
+    picsElems[picIndex[numberofTurns]].src="pics/"+picTiles[picIndex[numberofTurns]]+".png"
+    picsElems[picIndex[numberofTurns]].className="brickFront";
+    selectedPicture[numberofTurns]=picsElems[picIndex[numberofTurns]].src
+    // console.log("picIndex", picIndex[numberofTurns]); //Använde consol log för att felsöka hantera.
     if(picIndex[1]!=picIndex[0]) {
         // console.log("same", picIndex[0], picIndex[1]); //Använde consol log för att felsöka i hantera
-        if(noTurns>=1) {
+        if(numberofTurns>=1) {
             for(i=0;i<picsElems.length;i++) {
                 picsElems[i].disabled=true;
             }
             nextButton.disabled=false;  
         }    
-        noTurns++;
+        numberofTurns++;
     }    
 } //End turnPic
 
 //Funktion för att kontrollera att valen man gjort är rätt eller fel
 function checkPick() {
-    noTurns=0;
+    numberofTurns=0;
     // console.log("Checkpick"); //Använde consol log för att felsöka hantera.
     if (selectedPicture[0]==selectedPicture[1]) { //bugg avs att man kunde klicka på samma bild två ggr och få upp nästa
         picsElems[picIndex[0]].src="pics/empty.png";
@@ -139,10 +142,10 @@ function checkPick() {
         picsElems[picIndex[1]].className="brickEmpty";
         removeListener(picsElems[picIndex[0]], "click", turnPic);
         removeListener(picsElems[picIndex[1]], "click", turnPic);
-        rightPicks=rightPicks+2
+        rightPicks=rightPicks+2;
     } else {
-        picsElems[picIndex[0]].src="pics/backside.png"
-        picsElems[picIndex[1]].src="pics/backside.png"
+        picsElems[picIndex[0]].src="pics/backside.png";
+        picsElems[picIndex[1]].src="pics/backside.png";
         picsElems[picIndex[0]].className="brickBack";
         picsElems[picIndex[1]].className="brickBack";
         picIndex[0]=null; //Felsökte stor bugg, om man klickade på samma första gången gick det att vända tre bilder. Löstes genom denna kodrad.
@@ -169,7 +172,7 @@ function checkWin() {
             points=0;
         }
 
-        alert("Grattis! Du hittade alla rutor. Dina poäng blev "+points);
+        message.innerHTML="Grattis! Du hittade alla rutor. Dina poäng blev "+points;
 
         totalPoints+=points; //adderar rundans poäng till totalen
         //Uppdaterar användarens vy med poänginfo
