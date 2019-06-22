@@ -24,6 +24,7 @@ var message;            //Referens till message i HTML koden
 
 // Initiera globala variabler och koppla funktion till knapp
 function init() {
+    var i;          //Loopvariabel
     picIndex = [];          //Skapar en array
     selectedPicture = [];   //Skapar en array
     picTiles=[];            //Skapar en array
@@ -43,6 +44,10 @@ function init() {
     addListener(startGameBtn,"click", startGame);
     addListener(nextButton,"click", checkPick);
     addListener(displayScore,"click", showScore);
+    addListener(options,"change", changeBricks);
+    for(i=0;i<picsElems.length;i++) {
+        picsElems[i].setAttribute("id", "initial"+i); //sätter ett unikt ID på ursprungliga img elementen i index.
+    }
     nextButton.disabled=true;
 } //End init
 addListener(window,"load",init); // Se till att init aktiveras då sidan är inladdad
@@ -52,10 +57,6 @@ addListener(window, "load", getCookie); //hämtar cookies vid load
 //Funktion för att initiera spel
 function startGame() {
     message.innerHTML=""; //Tar bort meddelande vid nytt spel
-    for(i=0;i<picsElems.length;i++) {
-        picsElems[i].setAttribute("id", "initial"+i); //sätter ett unikt ID på ursprungliga img elementen i index.
-    }
-    changeBricks();
     totalGames++;   //Antal spel ökar med 1
     startGameBtn.disabled=true;
     checkTurns=0;   //Nytt spel, noll omgångar
@@ -262,6 +263,7 @@ function changeBricks() {
         img.setAttribute("src", "pics/backside.png");
         img.setAttribute("alt", "spelbricka");
         img.setAttribute("class", "brickBack");
+        img.setAttribute("id", "initial"+i)
         bricks.appendChild(img);
     }
 }
